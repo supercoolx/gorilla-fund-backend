@@ -13,4 +13,6 @@ const sequelize = new Sequelize(
 
 const User = UserModel(sequelize, DataTypes);
 
-module.exports = User;
+module.exports = {
+    User
+}

@@ -2,9 +2,8 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const passport = require('passport');
 require("dotenv").config();
-require('./config/passport')(passport);
+const { passport } = require('./config/passport');
 
 const authRouter = require('./routes/auth');
 

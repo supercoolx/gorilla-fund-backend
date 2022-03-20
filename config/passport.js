@@ -1,5 +1,6 @@
+const passport = require('passport');
 const { Strategy, ExtractJwt } = require('passport-jwt');
-const User = require('./sequelize');
+const { User } = require('./sequelize');
 
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -13,5 +14,11 @@ const jwtStrategy = new Strategy(options, (payload, done) => {
 	.then(user => done(null, user))
 	.catch(err => done(err));
 });
+passport.use(jwtStrategy);
 
-module.exports = passport => passport.use(jwtStrategy);
+const jwtValidator = passport.authenticate('jwt', { session: false });
+
+module.exports = {
+	passport,
+	jwtValidator
+};
