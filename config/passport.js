@@ -8,7 +8,7 @@ const options = {
 };
 
 const jwtStrategy = new Strategy(options, (payload, done) => {
-  return User.findOne({ 
+  	return User.findOne({ 
 		where: { email: payload.email } 
 	})
 	.then(user => done(null, user))

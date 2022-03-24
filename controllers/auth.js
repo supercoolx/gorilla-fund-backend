@@ -72,8 +72,8 @@ const signUp = async (req, res) => {
 
     jwt.sign(
         {
-            name: user.name,
-            email: user.email
+            name: req.body.name,
+            email: req.body.email
         },
         process.env.JWT_SECRET,
         {
