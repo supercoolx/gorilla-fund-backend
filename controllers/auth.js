@@ -1,7 +1,9 @@
 const { validateUserSignup, validateUserSignin } = require('../utils/validator');
+const generateRandomKey = require('../utils/generate_random_key');
 const { User } = require('../config/sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const moment = require('moment');
 
 const signIn = async (req, res) => {
     const { isValid, errors } = validateUserSignin(req.body);
@@ -88,6 +90,66 @@ const signUp = async (req, res) => {
     );
 }
 
+const forgetPassword = async (req, res) => {
+    const user = await User.findOne({
+        where: {
+            email: req.body.email
+        }
+    });
+
+    if(user) {
+        const token = generateRandomKey();
+        user.update({
+            password_token: token,
+            password_token_created_at: moment().format()
+        })
+        .then(() => {
+            res.json({
+                success: true
+            });
+        });
+    }
+    else {
+        res.status(401).json({
+            success: false,
+            message: "Email is not registered."
+        });
+    }
+}
+
+const resetPassword = async (req, res) => {
+    const user = await User.findOne({
+        where: {
+            email: req.body.email,
+            password_token: req.body.token
+        }
+    });
+
+    if(user && user.password_token) {
+        const password_hash = await bcrypt.hash(req.body.password, 10);
+        user.update({
+            password: password_hash,
+            password_token: null,
+            password_token_created_at: null
+        })
+        .then(() => {
+            res.json({
+                success: true
+            });
+        });
+    }
+    else {
+        res.status(404).json({
+            success: false,
+            message: "Reset link is invalid."
+        })
+    }
+}
+
+const verifyEmail = async (req, res) => {
+
+}
+
 const me = (req, res) => {
     res.json(req.user);
 }
@@ -95,5 +157,8 @@ const me = (req, res) => {
 module.exports = {
     signIn,
     signUp,
+    forgetPassword,
+    resetPassword,
+    verifyEmail,
     me
 }

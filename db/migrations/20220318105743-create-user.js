@@ -17,15 +17,32 @@ module.exports = {
         unique: true,
         allowNull: false
       },
+      email_token: {
+        type: Sequelize.STRING
+      },
+      email_token_created_at: {
+        type: Sequelize.DATE
+      },
       email_verified_at: {
         type: Sequelize.DATE
+      },
+      avatar: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       password: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      remember_token: {
+      password_token: {
         type: Sequelize.STRING
+      },
+      password_token_created_at: {
+        type: Sequelize.STRING
+      },
+      remember_token: {
+        type: Sequelize.STRING,
+        unique: true
       },
       createdAt: {
         type: Sequelize.DATE,

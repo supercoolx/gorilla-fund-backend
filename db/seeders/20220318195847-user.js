@@ -1,12 +1,16 @@
 'use strict';
 const bcrypt = require('bcrypt');
+const md5 = require('md5');
 
 module.exports = {
   async up (queryInterface, Sequelize) {
     let password = await bcrypt.hash('password', 10);
+    let email = 'test@email.com';
+    let hash = md5(email);
     await queryInterface.bulkInsert('Users', [{
       name: 'John Doe',
-      email: 'test@email.com',
+      email: email,
+      avatar: `https://avatars.dicebear.com/api/identicon/${hash}.svg`,
       password: password,
     }], {});
   },

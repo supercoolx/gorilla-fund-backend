@@ -6,7 +6,7 @@ const cors = require('cors');
 require("dotenv").config();
 
 const { passport } = require('./config/passport');
-const authRouter = require('./routes/auth');
+const router = require('./routes');
 
 const app = express();
 const public_path = path.join(__dirname, 'public');
@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use(cors());
 app.use(passport.initialize());
 app.use(express.static(public_path));
-app.use('/auth', authRouter);
+app.use('/api', router);
 app.get('*', (req, res) => {
     res.sendFile(path.join(public_path, 'index.html'));
 });
