@@ -1,9 +1,12 @@
 const { validateUserSignup, validateUserSignin } = require('../utils/validator');
-const generateRandomKey = require('../utils/generate_random_key');
+const { generateRandomKey, generateRandomNumber } = require('../utils/generate_random_key');
 const { User } = require('../config/sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const md5 = require('md5');
+const user = require('../db/models/user');
+const config = require('../config/config');
 
 const signIn = async (req, res) => {
     const { isValid, errors } = validateUserSignin(req.body);
@@ -66,15 +69,18 @@ const signUp = async (req, res) => {
     }
 
     const password_hash = await bcrypt.hash(req.body.password, 10);
+    const hash = md5(req.body.email);
     await User.create({
         name: req.body.name,
         email: req.body.email,
+        email_token: generateRandomNumber(),
+        email_token_created_at: moment().format(),
+        avatar: `https://avatars.dicebear.com/api/identicon/${hash}.svg`,
         password: password_hash,
     });
 
     jwt.sign(
         {
-            name: req.body.name,
             email: req.body.email
         },
         process.env.JWT_SECRET,
@@ -146,11 +152,62 @@ const resetPassword = async (req, res) => {
     }
 }
 
-const verifyEmail = async (req, res) => {
+const verifyResetLink = (req, res) => {
+    User.findOne({
+        where: {
+            email: req.body.email,
+            password_token: req.body.token
+        }
+    })
+    .then(user => {
+        if(user) res.json({ success: true });
+        else res.status(404).json({ success: false });
+    });
+}
 
+const setVerifyEmail = (req, res) => {
+    req.user.update({
+        email_token: generateRandomNumber(),
+        email_token_created_at: moment().format()
+    }).then(() => {
+        res.json({
+            success: true
+        });
+    });
+}
+
+const verifyEmail = (req, res) => {
+    if(!(req.body.token && req.user.email_token === req.body.token)) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid token",
+        });
+    }
+    
+    const isExpired = moment().isAfter(moment(user.email_token_created_at).add(config.EMAIL_VERIFY_EXPIRE_TIME, 'd'));
+    if(isExpired) {
+        return res.status(410).json({
+            success: false,
+            message: "This link is expired."
+        });
+    }
+
+    const current = moment().format();
+
+    req.user.update({
+        email_token: null,
+        email_token_created_at: null,
+        email_verified_at: current
+    }).then(() => {
+        res.json({
+            success: true,
+            email_verified_at: current
+        });
+    });
 }
 
 const me = (req, res) => {
+    delete req.user.password;
     res.json(req.user);
 }
 
@@ -159,6 +216,8 @@ module.exports = {
     signUp,
     forgetPassword,
     resetPassword,
+    verifyResetLink,
+    setVerifyEmail,
     verifyEmail,
     me
 }
