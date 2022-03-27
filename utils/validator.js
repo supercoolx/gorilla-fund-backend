@@ -42,7 +42,47 @@ const validateUserSignin = data => {
         isValid: isEmpty(errors)
     };
 }
+
+const validateFundCreate = data => {
+    let isValid = true;
+    let errors = {};
+    if(isEmpty(data.name)) {
+        isValid = false;
+        errors.name = "Name field is required.";
+    }
+    if(isEmpty(data.amount) || parseInt(data.amount) <= 0 ) {
+        isValid = false;
+        errors.amount = "Amount field is incorrect.";
+    }
+    if(isEmpty(data.forId)) {
+        isValid = false;
+        errors.forId = "What are you fundraising for?";
+    }
+    if(isEmpty(data.walletAddress)) {
+        isValid = false;
+        errors.walletAddress = "Wallet address is required.";
+    }
+    if(isEmpty(data.image)) {
+        isValid = false;
+        errors.image = "Please upload image";
+    }
+    if(isEmpty(data.headline)) {
+        isValid = false;
+        errors.headline = "Headline is required";
+    }
+    if(isEmpty(data.description)) {
+        isValid = false;
+        errors.description = "Description is requried";
+    }
+
+    return {
+        isValid,
+        errors
+    };
+}
+
 module.exports = {
     validateUserSignup,
-    validateUserSignin
+    validateUserSignin,
+    validateFundCreate
 }

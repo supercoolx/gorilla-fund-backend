@@ -1,5 +1,5 @@
 const { validateUserSignup, validateUserSignin } = require('../utils/validator');
-const { generateRandomKey, generateRandomNumber } = require('../utils/generate_random_key');
+const { generateRandomKey, generateRandomNumber } = require('../utils/generate_random');
 const { User } = require('../config/sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
