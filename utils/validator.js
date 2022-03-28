@@ -81,8 +81,68 @@ const validateFundCreate = data => {
     };
 }
 
+const validateKycCreate = data => {
+    let isValid = true;
+    let errors = {};
+    if(!data.firstName?.trim()) {
+        isValid = false;
+        errors.firstName = "First name is required.";
+    }
+    if(!data.lastName?.trim()) {
+        isValid = false;
+        errors.lastName = "Last name is required.";
+    }
+    if(!data.country) {
+        isValid = false;
+        errors.country = "Country is required.";
+    }
+    if(!data.phone?.trim()) {
+        isValid = false;
+        errors.phone = "Phone number is required.";
+    }
+    if(!data.zip?.trim()) {
+        isValid = false;
+        errors.zip = "Zip code is required.";
+    }
+    if(!data.city?.trim()) {
+        isValid = false;
+        errors.city = "City is required.";
+    }
+    if(!data.address?.trim()) {
+        isValid = false;
+        errors.address = "Address is required.";
+    }
+    if(!data.idType || 1 > data.idType || data.idType > 3) {
+        isValid = false;
+        errors.idType = "Select identity type.";
+    }
+    if(!data.number?.trim()) {
+        isValid = false;
+        errors.number = "Identity number is required.";
+    }
+    if(!data.expire) {
+        isValid = false;
+        errors.expire = "Expire date is required.";
+    }
+    if(!data.img1?.trim()) {
+        isValid = false;
+        errors.img1 = "Please upload image.";
+    }
+    if(!data.img2?.trim()) {
+        isValid = false;
+        errors.img2 = "Please upload image.";
+    }
+    if(!data.ether?.trim()) {
+        isValid = false;
+        errors.ether = "Wallet address is required.";
+    }
+
+    return { isValid, errors }
+}
+
 module.exports = {
     validateUserSignup,
     validateUserSignin,
-    validateFundCreate
+    validateFundCreate,
+    validateKycCreate
 }

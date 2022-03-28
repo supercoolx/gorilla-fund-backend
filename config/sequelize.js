@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const UserModel = require('../db/models/user');
 const FundModel = require('../db/models/fund');
+const KYCModel = require('../db/models/kyc');
 
 const sequelize = new Sequelize(
     process.env.DB_DATABASE,
@@ -14,8 +15,10 @@ const sequelize = new Sequelize(
 
 const User = UserModel(sequelize, DataTypes);
 const Fund = FundModel(sequelize, DataTypes);
+const KYC = KYCModel(sequelize, DataTypes);
 
 module.exports = {
     User,
-    Fund
+    Fund,
+    KYC
 }
