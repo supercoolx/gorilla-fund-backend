@@ -1,6 +1,6 @@
 const path = require('path');
 const { Op } = require('sequelize');
-const { Fund, User } = require('../config/sequelize');
+const { Fund } = require('../config/sequelize');
 const { validateFundCreate } = require('../utils/validator');
 const { generateUid } = require('../utils/generate_random');
 
@@ -15,7 +15,7 @@ const create = (req, res) => {
         user_id: req.user.id,
         name: data.name,
         amount: parseInt(data.amount),
-        for_id: parseInt(data.forId),
+        category_id: parseInt(data.categoryId),
         wallet_address: data.walletAddress,
         image: data.image,
         headline: data.headline,
@@ -60,7 +60,22 @@ const upload = (req, res) => {
     });
 }
 
-const get = (req, res) => {
+const topRated = (req, res) => {
+    let { count } = req.query;
+    count = parseInt(count);
+    count = count ? count : 1;
+    Fund.findAll({
+        limit: count,
+        order: [["amount", "DESC"]]
+    })
+    .then(funds => res.json(funds))
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
+}
+
+const findByUid = (req, res) => {
     Fund.findOne({ where: { uid: req.params.uid }})
     .then(fund => {
         if(fund) res.json(fund);
@@ -77,8 +92,31 @@ const get = (req, res) => {
     );
 }
 
+const search = (req, res) => {
+    const query = req.query;
+    const condition = { where: {} };
+    if(query.s) condition.where = {
+        [Op.or]: [
+            { name: { [Op.like]: `%${query.s}%` } },
+            { headline: { [Op.like]: `%${query.s}%` } },
+            { description: { [Op.like]: `%${query.s}%` } }
+        ],
+    }
+    if(query.category) condition.where.category_id = query.category;
+    if(query.sort) {
+        if(query.sort === "1") condition.order = [["createdAt", "DESC"]];
+        if(query.sort === "2") condition.order = [["amount", "DESC"]];
+    }
+    Fund.findAll(condition).then(funds => res.json(funds)).catch(err => res.json({
+        success: false,
+        message: err.message
+    }));
+}
+
 module.exports = {
     create,
     upload,
-    get
+    topRated,
+    findByUid,
+    search
 }

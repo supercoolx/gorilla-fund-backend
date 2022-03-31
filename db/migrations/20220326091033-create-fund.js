@@ -24,7 +24,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      for_id: {
+      category_id: {
         type: Sequelize.INTEGER
       },
       wallet_address: {
