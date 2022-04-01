@@ -54,9 +54,9 @@ const validateFundCreate = data => {
         isValid = false;
         errors.amount = "Amount field is incorrect.";
     }
-    if(isEmpty(data.forId)) {
+    if(isEmpty(data.categoryId)) {
         isValid = false;
-        errors.forId = "What are you fundraising for?";
+        errors.categoryId = "What are you fundraising for?";
     }
     if(isEmpty(data.walletAddress)) {
         isValid = false;

@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      user_id: {
+      userId: {
         type: Sequelize.BIGINT,
         allowNull: false
       },
@@ -24,10 +24,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      category_id: {
+      categoryId: {
         type: Sequelize.INTEGER
       },
-      wallet_address: {
+      walletAddress: {
         type: Sequelize.STRING
       },
       image: {
@@ -41,6 +41,26 @@ module.exports = {
       description: {
         type: Sequelize.TEXT,
         allowNull: false
+      },
+      allowDonorComment: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: 1
+      },
+      allowVisitorComment: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: 1
+      },
+      allowDonation: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: 1
+      },
+      allowSearch: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: 1
+      },
+      deleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,

@@ -1,6 +1,6 @@
 const path = require('path');
 const { Op } = require('sequelize');
-const { Fund } = require('../config/sequelize');
+const { Fund, User } = require('../config/sequelize');
 const { validateFundCreate } = require('../utils/validator');
 const { generateUid } = require('../utils/generate_random');
 
@@ -12,11 +12,11 @@ const create = (req, res) => {
     const uid = generateUid(data.name);
     Fund.create({
         uid: uid,
-        user_id: req.user.id,
+        userId: req.user.id,
         name: data.name,
         amount: parseInt(data.amount),
-        category_id: parseInt(data.categoryId),
-        wallet_address: data.walletAddress,
+        categoryId: parseInt(data.categoryId),
+        walletAddress: data.walletAddress,
         image: data.image,
         headline: data.headline,
         description: data.description
@@ -102,7 +102,7 @@ const search = (req, res) => {
             { description: { [Op.like]: `%${query.s}%` } }
         ],
     }
-    if(query.category) condition.where.category_id = query.category;
+    if(query.category) condition.where.categoryId = query.category;
     if(query.sort) {
         if(query.sort === "1") condition.order = [["createdAt", "DESC"]];
         if(query.sort === "2") condition.order = [["amount", "DESC"]];
@@ -113,10 +113,26 @@ const search = (req, res) => {
     }));
 }
 
+const getByUser = (req, res) => {
+    const user = req.user;
+    User.findOne({
+        where: {
+            id: user.id
+        },
+        include: Fund,
+    })
+    .then(funds => res.json(funds)).catch(err => res.json({
+        success: false,
+        message: err.message
+    }));
+    // res.json(user);
+}
+
 module.exports = {
     create,
     upload,
     topRated,
     findByUid,
-    search
+    search,
+    getByUser
 }

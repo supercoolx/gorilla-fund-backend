@@ -17,14 +17,14 @@ module.exports = (sequelize, DataTypes) => {
   User.init({
     name: DataTypes.STRING,
     email: DataTypes.STRING,
-    email_token: DataTypes.STRING,
-    email_token_created_at: DataTypes.DATE,
-    email_verified_at: DataTypes.DATE,
+    emailToken: DataTypes.STRING,
+    emailTokenCreatedAt: DataTypes.DATE,
+    emailVerifiedAt: DataTypes.DATE,
     avatar: DataTypes.STRING,
     password: DataTypes.STRING,
-    password_token: DataTypes.STRING,
-    password_token_created_at: DataTypes.DATE,
-    remember_token: DataTypes.STRING
+    passwordToken: DataTypes.STRING,
+    passwordTokenCreatedAt: DataTypes.DATE,
+    rememberToken: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',

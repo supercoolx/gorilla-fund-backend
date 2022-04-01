@@ -14,20 +14,20 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   kyc.init({
-    user_id: DataTypes.BIGINT,
-    first_name: DataTypes.STRING,
-    last_name: DataTypes.STRING,
+    userId: DataTypes.BIGINT,
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
     country: DataTypes.JSON,
     phone: DataTypes.STRING,
-    zip_code: DataTypes.STRING,
+    zipCode: DataTypes.STRING,
     city: DataTypes.STRING,
     address: DataTypes.STRING,
-    type_id: DataTypes.INTEGER,
-    id_number: DataTypes.STRING,
+    typeId: DataTypes.INTEGER,
+    idNumber: DataTypes.STRING,
     expire: DataTypes.DATE,
-    image_1: DataTypes.STRING,
-    image_2: DataTypes.STRING,
-    wallet_address: DataTypes.STRING
+    image1: DataTypes.STRING,
+    image2: DataTypes.STRING,
+    walletAddress: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'kyc',

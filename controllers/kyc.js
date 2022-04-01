@@ -40,20 +40,20 @@ const create = (req, res) => {
     });
 
     KYC.create({
-        user_id: req.user.id,
-        first_name: req.body.firstName,
-        last_name: req.body.lastName,
+        userId: req.user.id,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         country: req.body.country,
         phone: req.body.phone,
-        zip_code: req.body.zip,
+        zipCode: req.body.zip,
         city: req.body.city,
         address: req.body.address,
-        type_id: req.body.idType,
-        id_number: req.body.number,
+        typeId: req.body.idType,
+        idNumber: req.body.number,
         expire: req.body.expire,
-        image_1: req.body.img1,
-        image_2: req.body.img2,
-        wallet_address: req.body.ether,
+        image1: req.body.img1,
+        image2: req.body.img2,
+        walletAddress: req.body.ether,
     })
     .then(kyc => res.json(kyc))
     .catch(err => res.status(500).json({

@@ -73,8 +73,8 @@ const signUp = async (req, res) => {
     await User.create({
         name: req.body.name,
         email: req.body.email,
-        email_token: generateRandomNumber(),
-        email_token_created_at: moment().format(),
+        emailToken: generateRandomNumber(),
+        emailTokenCreateAt: moment().format(),
         avatar: `https://avatars.dicebear.com/api/identicon/${hash}.svg`,
         password: password_hash,
     });
@@ -106,8 +106,8 @@ const forgetPassword = async (req, res) => {
     if(user) {
         const token = generateRandomKey();
         user.update({
-            password_token: token,
-            password_token_created_at: moment().format()
+            passwordToken: token,
+            passwordTokenCreatedAt: moment().format()
         })
         .then(() => {
             res.json({
@@ -127,16 +127,16 @@ const resetPassword = async (req, res) => {
     const user = await User.findOne({
         where: {
             email: req.body.email,
-            password_token: req.body.token
+            passwordToken: req.body.token
         }
     });
 
-    if(user && user.password_token) {
+    if(user && user.passwordToken) {
         const password_hash = await bcrypt.hash(req.body.password, 10);
         user.update({
             password: password_hash,
-            password_token: null,
-            password_token_created_at: null
+            passwordToken: null,
+            passwordTokenCreatedAt: null
         })
         .then(() => {
             res.json({
@@ -156,7 +156,7 @@ const verifyResetLink = (req, res) => {
     User.findOne({
         where: {
             email: req.body.email,
-            password_token: req.body.token
+            passwordToken: req.body.token
         }
     })
     .then(user => {
@@ -167,8 +167,8 @@ const verifyResetLink = (req, res) => {
 
 const setVerifyEmail = (req, res) => {
     req.user.update({
-        email_token: generateRandomNumber(),
-        email_token_created_at: moment().format()
+        emailToken: generateRandomNumber(),
+        emailTokenCreateAt: moment().format()
     }).then(() => {
         res.json({
             success: true
@@ -177,14 +177,14 @@ const setVerifyEmail = (req, res) => {
 }
 
 const verifyEmail = (req, res) => {
-    if(!(req.body.token && req.user.email_token === req.body.token)) {
+    if(!(req.body.token && req.user.emailToken === req.body.token)) {
         return res.status(401).json({
             success: false,
             message: "Invalid token",
         });
     }
     
-    const isExpired = moment().isAfter(moment(user.email_token_created_at).add(config.EMAIL_VERIFY_EXPIRE_TIME, 'd'));
+    const isExpired = moment().isAfter(moment(user.emailTokenCreateAt).add(config.EMAIL_VERIFY_EXPIRE_TIME, 'd'));
     if(isExpired) {
         return res.status(410).json({
             success: false,
@@ -195,13 +195,13 @@ const verifyEmail = (req, res) => {
     const current = moment().format();
 
     req.user.update({
-        email_token: null,
-        email_token_created_at: null,
-        email_verified_at: current
+        emailToken: null,
+        emailTokenCreateAt: null,
+        emailVerifiedAt: current
     }).then(() => {
         res.json({
             success: true,
-            email_verified_at: current
+            emailVerifiedAt: current
         });
     });
 }

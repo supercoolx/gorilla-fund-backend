@@ -15,14 +15,19 @@ module.exports = (sequelize, DataTypes) => {
   }
   Fund.init({
     uid: DataTypes.STRING,
-    user_id: DataTypes.BIGINT,
+    userId: DataTypes.BIGINT,
     name: DataTypes.STRING,
     amount: DataTypes.INTEGER,
-    category_id: DataTypes.INTEGER,
-    wallet_address: DataTypes.STRING,
+    categoryId: DataTypes.INTEGER,
+    walletAddress: DataTypes.STRING,
     image: DataTypes.STRING,
     headline: DataTypes.STRING,
-    description: DataTypes.TEXT
+    description: DataTypes.TEXT,
+    allowDonorComment: DataTypes.BOOLEAN,
+    allowVisitorComment: DataTypes.BOOLEAN,
+    allowDonation: DataTypes.BOOLEAN,
+    allowSearch: DataTypes.BOOLEAN,
+    deleted: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Fund',

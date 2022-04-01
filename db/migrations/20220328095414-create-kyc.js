@@ -8,15 +8,15 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
+      userId: {
         type: Sequelize.BIGINT,
         allowNull: false
       },
-      first_name: {
+      firstName: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      last_name: {
+      lastName: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -28,7 +28,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      zip_code: {
+      zipCode: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -40,11 +40,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      type_id: {
+      typeId: {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      id_number: {
+      idNumber: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -52,15 +52,15 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false
       },
-      image_1: {
+      image1: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      image_2: {
+      image2: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      wallet_address: {
+      walletAddress: {
         type: Sequelize.STRING,
         allowNull: false
       },
