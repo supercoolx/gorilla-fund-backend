@@ -17,7 +17,8 @@ const User = UserModel(sequelize, DataTypes);
 const Fund = FundModel(sequelize, DataTypes);
 const KYC = KYCModel(sequelize, DataTypes);
 
-User.hasMany(Fund);
+User.hasMany(Fund, { as: "funds"});
+User.hasOne(KYC, { as: "user" });
 
 module.exports = {
     User,

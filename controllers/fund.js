@@ -92,6 +92,26 @@ const findByUid = (req, res) => {
     );
 }
 
+const myFund = (req, res) => {
+    Fund.findOne({ where: {
+        uid: req.params.uid,
+        userId: req.user.id
+    }})
+    .then(fund => {
+        if(fund) res.json(fund);
+        else res.status(404).json({
+            success: false,
+            message: "Cannot find this fund."
+        });
+    })
+    .catch(err =>
+        res.status(500).json({
+            success: false,
+            message: err.message
+        })
+    );
+}
+
 const search = (req, res) => {
     const query = req.query;
     const condition = { where: {} };
@@ -107,7 +127,7 @@ const search = (req, res) => {
         if(query.sort === "1") condition.order = [["createdAt", "DESC"]];
         if(query.sort === "2") condition.order = [["amount", "DESC"]];
     }
-    Fund.findAll(condition).then(funds => res.json(funds)).catch(err => res.json({
+    Fund.findAll(condition).then(funds => res.json(funds)).catch(err => res.status(500).json({
         success: false,
         message: err.message
     }));
@@ -116,16 +136,67 @@ const search = (req, res) => {
 const getByUser = (req, res) => {
     const user = req.user;
     User.findOne({
-        where: {
-            id: user.id
-        },
-        include: Fund,
+        where: { id: user.id },
+        include: "funds",
     })
-    .then(funds => res.json(funds)).catch(err => res.json({
+    .then(funds => res.json(funds)).catch(err => res.status(500).json({
         success: false,
         message: err.message
     }));
-    // res.json(user);
+}
+
+const update = async (req, res) => {
+    const { uid } = req.params;
+    const updates = req.body;
+
+    delete updates.id;
+    delete updates.uid;
+    delete updates.userId;
+
+    const fund = await Fund.findOne({
+        where: {
+            uid: uid,
+            userId: req.user.id
+        }
+    });
+    if(!fund) return res.status(404).json({
+        success: false,
+        message: "Cannot find this fund."
+    });
+    fund.update(updates).then(fund => res.json(fund)).catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
+}
+
+const emailSetting = (req, res) => {
+    req.user.update({ emailSetting: req.body.val })
+    .then(r => res.json({ success: true }))
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
+}
+
+const deleteFund = (req, res) => {
+    const { uid } = req.params;
+    Fund.destroy({
+        where: {
+            uid: uid,
+            userId: req.user.id
+        }
+    })
+    .then(result => {
+        if(!result) res.status(404).json({
+            success: false,
+            message: "Cannot find this fund."
+        });
+        else res.json({ success: true });
+    })
+    .catch(err => res.json({
+        success: false,
+        message: err.message
+    }));
 }
 
 module.exports = {
@@ -134,5 +205,9 @@ module.exports = {
     topRated,
     findByUid,
     search,
-    getByUser
+    getByUser,
+    update,
+    myFund,
+    emailSetting,
+    deleteFund
 }

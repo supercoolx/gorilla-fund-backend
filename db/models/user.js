@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     emailTokenCreatedAt: DataTypes.DATE,
     emailVerifiedAt: DataTypes.DATE,
     avatar: DataTypes.STRING,
+    emailSetting: DataTypes.TINYINT,
     password: DataTypes.STRING,
     passwordToken: DataTypes.STRING,
     passwordTokenCreatedAt: DataTypes.DATE,

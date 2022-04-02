@@ -30,6 +30,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
+      emailSetting: {
+        type: Sequelize.TINYINT,
+        defaultValue: 0
+      },
       password: {
         type: Sequelize.STRING,
         allowNull: false
