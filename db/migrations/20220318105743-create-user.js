@@ -10,12 +10,10 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false
       },
       email: {
         type: Sequelize.STRING,
         unique: true,
-        allowNull: false
       },
       emailToken: {
         type: Sequelize.STRING
@@ -35,8 +33,7 @@ module.exports = {
         defaultValue: 0
       },
       password: {
-        type: Sequelize.STRING,
-        allowNull: false
+        type: Sequelize.STRING
       },
       passwordToken: {
         type: Sequelize.STRING
@@ -44,9 +41,21 @@ module.exports = {
       passwordTokenCreatedAt: {
         type: Sequelize.STRING
       },
+      address: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+      metamaskToken: {
+        type: Sequelize.STRING,
+        unique: true
+      },
       rememberToken: {
         type: Sequelize.STRING,
         unique: true
+      },
+      deleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: 0
       },
       createdAt: {
         type: Sequelize.DATE,

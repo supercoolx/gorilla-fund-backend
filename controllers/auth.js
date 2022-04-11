@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const md5 = require('md5');
+const { recoverPersonalSignature } = require('eth-sig-util');
+const { bufferToHex } = require('ethereumjs-util');
 const user = require('../db/models/user');
 const config = require('../config/config');
 
@@ -14,7 +16,8 @@ const signIn = async (req, res) => {
 
     const user = await User.findOne({
         where: {
-            email: req.body.email
+            email: req.body.email,
+            deleted: 0
         }
     });
 
@@ -206,8 +209,70 @@ const verifyEmail = (req, res) => {
     });
 }
 
+const getMetamaskToken = (req, res) => {
+    const { address } = req.body;
+    User.findOne({
+        where: { address: address }
+    })
+    .then(user => {
+        let randomkey = generateRandomKey();
+        if(user) {
+            user.metamaskToken = randomkey;
+            user.save().then(() => res.json({randomkey, address}));
+        }
+        else {
+            const hash = md5(address);
+            User.create({
+                address: address,
+                metamaskToken: randomkey,
+                avatar: `https://avatars.dicebear.com/api/identicon/${hash}.svg`,
+            })
+            .then(() => res.json({randomkey, address}));
+        }
+    })
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
+}
+
+const signinMetamask = async (req, res) => {
+    const { address, signature } = req.body;
+    const user = await User.findOne({ where: { address: address } });
+    if(!user) return res.status(404).json({
+        success: false,
+        message: "Your wallet is not registered"
+    });
+    const msg = `Please sign the message to authenticate.\ntoken: ${user.metamaskToken}`;
+    const msgBufferHex = bufferToHex(Buffer.from(msg, 'utf8'));
+    const recoverAddress = recoverPersonalSignature({
+        data: msgBufferHex,
+        sig: signature
+    });
+    if(address.toLowerCase() === recoverAddress.toLowerCase()) {
+        jwt.sign(
+            { address },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: process.env.JWT_EXPIRATION
+            },
+            (err, token) => {
+                res.json({
+                    success: true,
+                    token: 'Bearer ' + token
+                });
+            }
+        );
+    }
+    else {
+        return res.status(401).json({
+            success: false,
+            message: "Signature verification failed"
+        });
+    }
+}
+
 const me = (req, res) => {
-    delete req.user.password;
     res.json(req.user);
 }
 
@@ -219,5 +284,7 @@ module.exports = {
     verifyResetLink,
     setVerifyEmail,
     verifyEmail,
+    getMetamaskToken,
+    signinMetamask,
     me
 }

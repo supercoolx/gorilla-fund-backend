@@ -10,6 +10,8 @@ router.post('/reset_password', authController.resetPassword);
 router.post('/verify_reset_link', authController.verifyResetLink);
 router.post('/set_verify_email', jwtValidator, authController.setVerifyEmail);
 router.post('/verify_email', jwtValidator, authController.verifyEmail);
+router.post('/getMetamaskToken', authController.getMetamaskToken);
+router.post('/signinMetamask', authController.signinMetamask);
 router.get('/me', jwtValidator, authController.me);
 
 module.exports = router;

@@ -25,7 +25,10 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING,
     passwordToken: DataTypes.STRING,
     passwordTokenCreatedAt: DataTypes.DATE,
-    rememberToken: DataTypes.STRING
+    address: DataTypes.BOOLEAN,
+    metamaskToken: DataTypes.STRING,
+    rememberToken: DataTypes.STRING,
+    deleted: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'User',
