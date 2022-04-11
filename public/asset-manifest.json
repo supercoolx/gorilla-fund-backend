@@ -1,10 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.56b3d51e.css",
-    "main.js": "/static/js/main.3643790f.js",
+    "main.css": "/static/css/main.c0ad6650.css",
+    "main.js": "/static/js/main.a199ba7f.js",
     "static/js/787.21c54aa5.chunk.js": "/static/js/787.21c54aa5.chunk.js",
-    "static/media/game_play.png": "/static/media/game_play.77dc2e66cbc0feddb911.png",
-    "static/media/fund_photo.png": "/static/media/fund_photo.c85e7c047e8e44d089eb.png",
     "static/media/stories.png": "/static/media/stories.dc8795ecec5abceeb707.png",
     "static/media/gorilla_suit.png": "/static/media/gorilla_suit.0bcbecced5ae5a87ff2c.png",
     "static/media/e-sport.png": "/static/media/e-sport.57c52a4d0e88d8148998.png",
@@ -35,12 +33,12 @@
     "static/media/startup.svg": "/static/media/startup.566006f099779415ff3cf240bf1a7b06.svg",
     "static/media/security.svg": "/static/media/security.192a53845e1104ef0a1586c1276e66dd.svg",
     "static/media/flash.svg": "/static/media/flash.0c427351f2a430f78d196ee674ea3f52.svg",
-    "main.56b3d51e.css.map": "/static/css/main.56b3d51e.css.map",
-    "main.3643790f.js.map": "/static/js/main.3643790f.js.map",
+    "main.c0ad6650.css.map": "/static/css/main.c0ad6650.css.map",
+    "main.a199ba7f.js.map": "/static/js/main.a199ba7f.js.map",
     "787.21c54aa5.chunk.js.map": "/static/js/787.21c54aa5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.56b3d51e.css",
-    "static/js/main.3643790f.js"
+    "static/css/main.c0ad6650.css",
+    "static/js/main.a199ba7f.js"
   ]
 }
