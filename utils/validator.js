@@ -3,11 +3,11 @@ const isEmpty = require('./is_empty');
 
 const validateUserSignup = data => {
     let errors = {};
-    data.name = !isEmpty(data.name) ? data.name : '';
+    data.username = !isEmpty(data.username) ? data.username : '';
     data.password = !isEmpty(data.password) ? data.password : '';
     data.email = !isEmpty(data.email) ? data.email : '';
-    if(!validator.isLength(data.name, {min: 2})){
-        errors.name = "Must be at least 2 characters.";
+    if(!/^\w+$/.test(data.username)){
+        errors.username = "Must be alphanumeric.";
     }
     if(!validator.isLength(data.password, {min: 8})){
         errors.password = "Must be at least 8 characters.";
@@ -100,9 +100,9 @@ const validateKycCreate = data => {
         isValid = false;
         errors.phone = "Phone number is required.";
     }
-    if(!data.zip?.trim()) {
+    if(!data.zipCode?.trim()) {
         isValid = false;
-        errors.zip = "Zip code is required.";
+        errors.zipCode = "Zip code is required.";
     }
     if(!data.city?.trim()) {
         isValid = false;
@@ -112,29 +112,29 @@ const validateKycCreate = data => {
         isValid = false;
         errors.address = "Address is required.";
     }
-    if(!data.idType || 1 > data.idType || data.idType > 3) {
+    if(!data.identifyType || 1 > data.identifyType || data.identifyType > 3) {
         isValid = false;
-        errors.idType = "Select identity type.";
+        errors.identifyType = "Select identity type.";
     }
-    if(!data.number?.trim()) {
+    if(!data.identifyNumber?.trim()) {
         isValid = false;
-        errors.number = "Identity number is required.";
+        errors.identifyNumber = "Identity number is required.";
     }
-    if(!data.expire) {
+    if(!data.identifyExpire) {
         isValid = false;
-        errors.expire = "Expire date is required.";
+        errors.identifyExpire = "Expire date is required.";
     }
-    if(!data.img1?.trim()) {
+    if(!data.doc1?.trim()) {
         isValid = false;
-        errors.img1 = "Please upload image.";
+        errors.doc1 = "Please upload image.";
     }
-    if(!data.img2?.trim()) {
+    if(!data.doc2?.trim()) {
         isValid = false;
-        errors.img2 = "Please upload image.";
+        errors.doc2 = "Please upload image.";
     }
-    if(!data.ether?.trim()) {
+    if(!data.walletAddress?.trim()) {
         isValid = false;
-        errors.ether = "Wallet address is required.";
+        errors.walletAddress = "Wallet address is required.";
     }
 
     return { isValid, errors }

@@ -8,7 +8,6 @@ router.get('/top_rated', fundController.topRated);
 router.get('/search', fundController.search);
 router.post('/create', jwtValidator, fundController.create);
 router.post('/upload', jwtValidator, fundController.upload);
-router.post('/email_setting', jwtValidator, fundController.emailSetting);
 router.put('/:uid', jwtValidator, fundController.update);
 router.delete('/:uid', jwtValidator, fundController.deleteFund);
 router.get('/:uid', fundController.findByUid);

@@ -36,15 +36,10 @@ const signIn = async (req, res) => {
         });
     }
 
-    jwt.sign(
-        {
-            name: user.name,
-            email: user.email
-        },
+    jwt.sign( 
+        { email: user.email },
         process.env.JWT_SECRET,
-        {
-            expiresIn: process.env.JWT_EXPIRATION
-        },
+        { expiresIn: process.env.JWT_EXPIRATION },
         (err, token) => {
             res.json({
                 success: true,
@@ -58,12 +53,14 @@ const signUp = async (req, res) => {
     const { isValid, errors } = validateUserSignup(req.body);
     if(!isValid) return res.status(422).json(errors);
 
-    const user = await User.findOne({
-        where: {
-            email: req.body.email
-        }
-    });
-
+    let user = await User.findOne({ where: { username: req.body.username } });
+    if(user) {
+        return res.status(409).json({
+            success: false,
+            message: "Username is already in use."
+        });
+    }
+    user = await User.findOne({ where: { email: req.body.email } });
     if(user) {
         return res.status(409).json({
             success: false,
@@ -74,7 +71,7 @@ const signUp = async (req, res) => {
     const password_hash = await bcrypt.hash(req.body.password, 10);
     const hash = md5(req.body.email);
     await User.create({
-        name: req.body.name,
+        username: req.body.username,
         email: req.body.email,
         emailToken: generateRandomNumber(),
         emailTokenCreateAt: moment().format(),
@@ -82,14 +79,10 @@ const signUp = async (req, res) => {
         password: password_hash,
     });
 
-    jwt.sign(
-        {
-            email: req.body.email
-        },
+    jwt.sign( 
+        { email: req.body.email },
         process.env.JWT_SECRET,
-        {
-            expiresIn: process.env.JWT_EXPIRATION
-        },
+        { expiresIn: process.env.JWT_EXPIRATION },
         (err, token) => {
             res.json({
                 success: true,
@@ -100,11 +93,7 @@ const signUp = async (req, res) => {
 }
 
 const forgetPassword = async (req, res) => {
-    const user = await User.findOne({
-        where: {
-            email: req.body.email
-        }
-    });
+    const user = await User.findOne({ where: { email: req.body.email } });
 
     if(user) {
         const token = generateRandomKey();
@@ -179,7 +168,7 @@ const setVerifyEmail = (req, res) => {
     });
 }
 
-const verifyEmail = (req, res) => {
+const verifyEmail = async (req, res) => {
     if(!(req.body.token && req.user.emailToken === req.body.token)) {
         return res.status(401).json({
             success: false,
@@ -197,7 +186,7 @@ const verifyEmail = (req, res) => {
 
     const current = moment().format();
 
-    req.user.update({
+    user.update({
         emailToken: null,
         emailTokenCreateAt: null,
         emailVerifiedAt: current
@@ -210,24 +199,24 @@ const verifyEmail = (req, res) => {
 }
 
 const getMetamaskToken = (req, res) => {
-    const { address } = req.body;
+    const { walletAddress } = req.body;
     User.findOne({
-        where: { address: address }
+        where: { walletAddress }
     })
     .then(user => {
         let randomkey = generateRandomKey();
         if(user) {
             user.metamaskToken = randomkey;
-            user.save().then(() => res.json({randomkey, address}));
+            user.save().then(() => res.json({randomkey, walletAddress}));
         }
         else {
-            const hash = md5(address);
+            const hash = md5(walletAddress);
             User.create({
-                address: address,
+                walletAddress,
                 metamaskToken: randomkey,
                 avatar: `https://avatars.dicebear.com/api/identicon/${hash}.svg`,
             })
-            .then(() => res.json({randomkey, address}));
+            .then(() => res.json({randomkey, walletAddress}));
         }
     })
     .catch(err => res.status(500).json({
@@ -237,8 +226,8 @@ const getMetamaskToken = (req, res) => {
 }
 
 const signinMetamask = async (req, res) => {
-    const { address, signature } = req.body;
-    const user = await User.findOne({ where: { address: address } });
+    const { walletAddress, signature } = req.body;
+    const user = await User.findOne({ where: { walletAddress } });
     if(!user) return res.status(404).json({
         success: false,
         message: "Your wallet is not registered"
@@ -249,9 +238,9 @@ const signinMetamask = async (req, res) => {
         data: msgBufferHex,
         sig: signature
     });
-    if(address.toLowerCase() === recoverAddress.toLowerCase()) {
+    if(walletAddress.toLowerCase() === recoverAddress.toLowerCase()) {
         jwt.sign(
-            { address },
+            { walletAddress },
             process.env.JWT_SECRET,
             {
                 expiresIn: process.env.JWT_EXPIRATION
@@ -273,7 +262,27 @@ const signinMetamask = async (req, res) => {
 }
 
 const me = (req, res) => {
-    res.json(req.user);
+    const user = {
+        loggedIn: true,
+        username: req.user.username,
+        email: req.user.email,
+        emailSetting: req.user.emailSetting,
+        avatar: req.user.avatar,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        country: JSON.parse(req.user.country),
+        phone: req.user.phone,
+        zipCode: req.user.zipCode,
+        city: req.user.city,
+        address: req.user.address,
+        identifyType: req.user.identifyType,
+        identifyNumber: req.user.identifyNumber,
+        identifyExpire: req.user.identifyExpire,
+        document1: req.user.document1,
+        document2: req.user.document2,
+        walletAddress: req.user.walletAddress,
+    }
+    res.json(user);
 }
 
 module.exports = {

@@ -3,20 +3,20 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Users', {
       id: {
-        allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.BIGINT
       },
-      name: {
+      username: {
         type: Sequelize.STRING,
+        unique: true,
       },
       email: {
         type: Sequelize.STRING,
         unique: true,
       },
       emailToken: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       emailTokenCreatedAt: {
         type: Sequelize.DATE
@@ -24,30 +24,65 @@ module.exports = {
       emailVerifiedAt: {
         type: Sequelize.DATE
       },
-      avatar: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
       emailSetting: {
         type: Sequelize.TINYINT,
         defaultValue: 0
       },
+      avatar: {
+        type: Sequelize.STRING,
+      },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       passwordToken: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       passwordTokenCreatedAt: {
         type: Sequelize.STRING
       },
+      firstName: {
+        type: Sequelize.STRING,
+      },
+      lastName: {
+        type: Sequelize.STRING,
+      },
+      country: {
+        type: Sequelize.JSON,
+      },
+      phone: {
+        type: Sequelize.STRING,
+      },
+      zipCode: {
+        type: Sequelize.STRING,
+      },
+      city: {
+        type: Sequelize.STRING,
+      },
       address: {
+        type: Sequelize.STRING,
+      },
+      identifyType: {
+        type: Sequelize.INTEGER,
+        default: 0
+      },
+      identifyNumber: {
+        type: Sequelize.STRING,
+      },
+      identifyExpire: {
+        type: Sequelize.DATE,
+      },
+      document1: {
+        type: Sequelize.STRING,
+      },
+      document2: {
+        type: Sequelize.STRING,
+      },
+      walletAddress: {
         type: Sequelize.STRING,
         unique: true
       },
       metamaskToken: {
         type: Sequelize.STRING,
-        unique: true
       },
       rememberToken: {
         type: Sequelize.STRING,

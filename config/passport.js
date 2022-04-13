@@ -13,18 +13,14 @@ const jwtStrategy = new Strategy(options, (payload, done) => {
 		where: {
 			[Op.or]: [
 				{ email: payload.email || "xxx" },
-				{ address: payload.address || "xxx" }
+				{ walletAddress: payload.walletAddress || "xxx" }
 			]
 		}
 	})
-	.then(user => done(null, {
-		id: user.id,
-		name: user.name,
-		email: user.email,
-		avatar: user.avatar,
-		emailSetting: user.emailSetting,
-		address: user.address,
-	}))
+	.then(user => {
+		if(user) return done(null, user);
+		else throw new Error('Cannot find user.');
+	})
 	.catch(err => done(err));
 });
 passport.use(jwtStrategy);

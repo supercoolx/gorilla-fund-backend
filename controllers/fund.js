@@ -169,15 +169,6 @@ const update = async (req, res) => {
     }));
 }
 
-const emailSetting = (req, res) => {
-    req.user.update({ emailSetting: req.body.val })
-    .then(r => res.json({ success: true }))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
-}
-
 const deleteFund = (req, res) => {
     const { uid } = req.params;
     Fund.destroy({
@@ -208,6 +199,5 @@ module.exports = {
     getByUser,
     update,
     myFund,
-    emailSetting,
     deleteFund
 }

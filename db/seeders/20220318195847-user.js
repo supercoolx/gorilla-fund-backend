@@ -8,7 +8,7 @@ module.exports = {
     let email = 'test@email.com';
     let hash = md5(email);
     await queryInterface.bulkInsert('Users', [{
-      name: 'John Doe',
+      username: 'John Doe',
       email: email,
       avatar: `https://avatars.dicebear.com/api/identicon/${hash}.svg`,
       password: password,
