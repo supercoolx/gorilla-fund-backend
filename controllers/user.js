@@ -1,6 +1,9 @@
+const md5 = require('md5');
 const path = require("path");
+const moment = require("moment");
 const { User } = require("../config/sequelize");
-const { validateKycCreate } = require("../utils/validator");
+const { generateRandomNumber } = require("../utils/generate_random");
+const { validateKycCreate, validateProfile } = require("../utils/validator");
 
 const docUpload = (req, res) => {
     if(!req.files || Object.keys(req.files).length === 0 || !req.files.doc1 || !req.files.doc2) {
@@ -26,6 +29,69 @@ const docUpload = (req, res) => {
         path1: filePath1,
         path2: filePath2
     }))
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
+}
+
+const avatarUpload = (req, res) => {
+    if(!req.files || Object.keys(req.files).length === 0 || !req.files.avatar) {
+        let hash = md5(req.user.email || req.user.walletAddress);
+        let avatar = `https://avatars.dicebear.com/api/identicon/${hash}.svg`;
+        req.user.update({ avatar })
+        .then(() => res.json({
+            success: true,
+            path: avatar
+        }))
+        .catch(err => res.status(500).json({
+            success: false,
+            message: err.message
+        }));
+    }
+    else {
+        const file = req.files.avatar;
+        const fileName = Date.now() + "_" + file.name;
+        const filePath = "/uploads/avatar/" + fileName;
+        const uploadPath = path.resolve("public", "uploads", "avatar");
+        file.mv(path.join(uploadPath, fileName))
+        .then(() => req.user.update({ avatar: filePath }))
+        .then(() => res.json({
+            success: true,
+            path: filePath
+        }))
+        .catch(err => res.status(500).json({
+            success: false,
+            message: err.message
+        }));
+    }
+}
+
+const updateProfile = (req, res) => {
+    const data = req.body;
+    const { errors, isValid } = validateProfile(data);
+    if(!isValid) res.status(422).json({
+        success: false,
+        message: errors
+    });
+    
+    const updateData = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        username: req.body.username,
+        email: req.body.email,
+        phone: req.body.phone,
+        address: req.body.address,
+        country: req.body.country,
+        city: req.body.city,
+        zipCode: req.body.zipCode,
+    }
+    if(req.user.email !== req.body.email) {
+        updateData.emailToken = generateRandomNumber();
+        updateData.emailTokenCreatedAt = moment().format();
+        updateData.emailVerifiedAt = null;
+    }
+    req.user.update(updateData).then(user => res.json({ success: true }))
     .catch(err => res.status(500).json({
         success: false,
         message: err.message
@@ -91,9 +157,45 @@ const confirmWallet = (req, res) => {
     }));
 }
 
+const updateWallet = async (req, res) => {
+    const { walletAddress } = req.body;
+
+    if(req.user.walletAddress !== walletAddress) {
+        let sameAddressUser = await User.findOne({ where: { walletAddress } });
+        if(sameAddressUser) return res.status(401).json({
+            success: false,
+            message: "Address is already in use"
+        });
+    }
+
+    req.user.update({ walletAddress })
+    .then(() => res.json({ success: true }))
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
+}
+
+const confirmEmail = (req, res) => {
+    if(req.user.email === req.body.email) return res.json({ success: true });
+    User.findOne({ where: { email: req.body.email } })
+    .then(user => {
+        if(user) res.json({ success: false });
+        else res.json({ success: true });
+    })
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
+}
+
 module.exports = {
     docUpload,
+    avatarUpload,
+    updateProfile,
     kyc,
     emailSetting,
-    confirmWallet
+    confirmWallet,
+    updateWallet,
+    confirmEmail,
 }

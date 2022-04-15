@@ -12,6 +12,8 @@ router.post('/set_verify_email', jwtValidator, authController.setVerifyEmail);
 router.post('/verify_email', jwtValidator, authController.verifyEmail);
 router.post('/getMetamaskToken', authController.getMetamaskToken);
 router.post('/signinMetamask', authController.signinMetamask);
+router.put('/change_password', jwtValidator, authController.changePassword);
+router.delete('/delete', jwtValidator, authController.deleteAccount);
 router.get('/me', jwtValidator, authController.me);
 
 module.exports = router;

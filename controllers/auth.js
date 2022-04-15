@@ -14,21 +14,19 @@ const signIn = async (req, res) => {
     const { isValid, errors } = validateUserSignin(req.body);
     if(!isValid) return res.status(422).json(errors);
 
-    const user = await User.findOne({
-        where: {
-            email: req.body.email,
-            deleted: 0
-        }
+    const user = await User.findOne({ where: { email: req.body.email } });
+
+    if(!user) return res.status(401).json({
+        success: false,
+        message: "Unregistered email."
     });
 
-    if(!user) {
-        return res.status(401).json({
-            success: false,
-            message: "Unregistered email."
-        });
-    }
+    if(user.deleted) return res.status(403).json({
+        success: false,
+        message: "This account has been closed."
+    });
 
-    const isMatch = await bcrypt.compare(req.body.password, user.password);
+    const isMatch = await bcrypt.compare(req.body.password, user.password || "");
     if(!isMatch) {
         return res.status(403).json({
             success: false,
@@ -206,6 +204,10 @@ const getMetamaskToken = (req, res) => {
     .then(user => {
         let randomkey = generateRandomKey();
         if(user) {
+            if(user.deleted) return res.status(403).json({
+                success: false,
+                message: "Your account has been closed"
+            });
             user.metamaskToken = randomkey;
             user.save().then(() => res.json({randomkey, walletAddress}));
         }
@@ -231,6 +233,10 @@ const signinMetamask = async (req, res) => {
     if(!user) return res.status(404).json({
         success: false,
         message: "Your wallet is not registered"
+    });
+    if(user.deleted) return res.status(403).json({
+        success: false,
+        message: "Your account has been closed"
     });
     const msg = `Please sign the message to authenticate.\ntoken: ${user.metamaskToken}`;
     const msgBufferHex = bufferToHex(Buffer.from(msg, 'utf8'));
@@ -259,6 +265,49 @@ const signinMetamask = async (req, res) => {
             message: "Signature verification failed"
         });
     }
+}
+
+const changePassword = (req, res) => {
+    const { current, newPass } = req.body;
+    if(newPass.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        })
+    }
+    if(current === "" && req.user.password === null) {
+        bcrypt.hash(newPass, 10)
+        .then(hashed => req.user.update({ password: hashed }))
+        .then(r => res.json({ success: true }))
+        .catch(err => res.status(500).json({
+            success: false,
+            message: err.message
+        }));
+    }
+    else {
+        bcrypt.compare(current, req.user.password || "")
+        .then(isMatch => {
+            if(!isMatch) {
+                throw new Error("Password is incorrect.");
+            }
+            else return bcrypt.hash(newPass, 10);
+        })
+        .then(hashed => req.user.update({ password: hashed }))
+        .then(r => res.json({ success: true }))
+        .catch(err => res.status(500).json({
+            success: false,
+            message: err.message
+        }));
+    }
+}
+
+const deleteAccount = (req, res) => {
+    req.user.update({ deleted: true })
+    .then(() => res.json({ success: true }))
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
 }
 
 const me = (req, res) => {
@@ -295,5 +344,7 @@ module.exports = {
     verifyEmail,
     getMetamaskToken,
     signinMetamask,
+    changePassword,
+    deleteAccount,
     me
 }
