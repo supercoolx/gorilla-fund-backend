@@ -7,7 +7,7 @@ const mail = require('../config/mail');
 router.use('/auth', authRouter);
 router.use('/fund', fundRouter);
 router.use('/user', userRouter);
-router.use('/ping', (req, res) => {
+router.get('/ping', (req, res) => {
     mail.sendMail({
         from: process.env.MAIL_USER,
         to: 'stepan912@dispomail.win',
