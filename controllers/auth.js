@@ -112,15 +112,29 @@ const forgetPassword = async (req, res) => {
 
     if(user) {
         const token = generateRandomKey();
+        const reset_link = `${process.env.APP_URL}/reset/${req.body.email}/${token}`;
+
+        const template_source = fs.readFileSync(path.join(__dirname, '..', 'template', 'mail', 'reset_password.hbs'), 'utf-8');
+        const template = handlebars.compile(template_source);
+        const html = template({ link: reset_link });
+        mail.sendMail({
+            from: process.env.MAIL_USER,
+            to: req.body.email,
+            subject: 'Reset your password',
+            html: html
+        })
+        .then(info => console.log(info))
+        .catch(err => console.log(err.message));
+
         user.update({
             passwordToken: token,
             passwordTokenCreatedAt: moment().format()
         })
-        .then(() => {
-            res.json({
-                success: true
-            });
-        });
+        .then(() => res.json({ success: true }))
+        .catch(err => res.status(500).json({
+            success: false,
+            message: err.message
+        }));
     }
     else {
         res.status(401).json({
