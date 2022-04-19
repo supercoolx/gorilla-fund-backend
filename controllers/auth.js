@@ -173,14 +173,29 @@ const verifyResetLink = (req, res) => {
 }
 
 const setVerifyEmail = (req, res) => {
+    const email_verify_code = generateRandomNumber();
+
+    const template_source = fs.readFileSync(path.join(__dirname, '..', 'template', 'mail', 'email_verify.hbs'), 'utf-8');
+    const template = handlebars.compile(template_source);
+    const html = template({ code: email_verify_code });
+    mail.sendMail({
+        from: process.env.MAIL_USER,
+        to: req.user.email,
+        subject: 'Verify your email address',
+        html: html
+    })
+    .then(info => console.log(info))
+    .catch(err => console.log(err.message));
+
     req.user.update({
-        emailToken: generateRandomNumber(),
+        emailToken: email_verify_code,
         emailTokenCreateAt: moment().format()
-    }).then(() => {
-        res.json({
-            success: true
-        });
-    });
+    })
+    .then(() => res.json({ success: true }))
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
 }
 
 const verifyEmail = async (req, res) => {
