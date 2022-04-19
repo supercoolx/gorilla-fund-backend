@@ -1,14 +1,18 @@
-const { validateUserSignup, validateUserSignin } = require('../utils/validator');
-const { generateRandomKey, generateRandomNumber } = require('../utils/generate_random');
-const { User } = require('../config/sequelize');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const moment = require('moment');
+const fs = require('fs');
 const md5 = require('md5');
-const { recoverPersonalSignature } = require('eth-sig-util');
+const path = require('path');
+const bcrypt = require('bcrypt');
+const moment = require('moment');
+const jwt = require('jsonwebtoken');
+const handlebars = require('handlebars');
 const { bufferToHex } = require('ethereumjs-util');
+const { recoverPersonalSignature } = require('eth-sig-util');
+const mail = require('../service/mail');
 const user = require('../db/models/user');
 const config = require('../config/config');
+const { User } = require('../config/sequelize');
+const { validateUserSignup, validateUserSignin } = require('../utils/validator');
+const { generateRandomKey, generateRandomNumber } = require('../utils/generate_random');
 
 const signIn = async (req, res) => {
     const { isValid, errors } = validateUserSignin(req.body);
@@ -68,14 +72,27 @@ const signUp = async (req, res) => {
 
     const password_hash = await bcrypt.hash(req.body.password, 10);
     const hash = md5(req.body.email);
+    const email_verify_code = generateRandomNumber();
     await User.create({
         username: req.body.username,
         email: req.body.email,
-        emailToken: generateRandomNumber(),
+        emailToken: email_verify_code,
         emailTokenCreateAt: moment().format(),
         avatar: `https://avatars.dicebear.com/api/identicon/${hash}.svg`,
         password: password_hash,
     });
+
+    const template_source = fs.readFileSync(path.join(__dirname, '..', 'template', 'mail', 'email_verify.hbs'), 'utf-8');
+    const template = handlebars.compile(template_source);
+    const html = template({ code: email_verify_code });
+    mail.sendMail({
+        from: process.env.MAIL_USER,
+        to: req.body.email,
+        subject: 'Verify your email address',
+        html: html
+    })
+    .then(info => console.log(info))
+    .catch(err => console.log(err.message));
 
     jwt.sign( 
         { email: req.body.email },
