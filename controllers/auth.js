@@ -201,7 +201,7 @@ const verifyEmail = async (req, res) => {
 
     const current = moment().format();
 
-    user.update({
+    req.user.update({
         emailToken: null,
         emailTokenCreateAt: null,
         emailVerifiedAt: current
