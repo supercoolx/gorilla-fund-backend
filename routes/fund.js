@@ -2,10 +2,12 @@ const router = require('express').Router();
 const { jwtValidator } = require('../config/passport');
 const fundController = require('../controllers/fund');
 
-router.get('/get_by_user', jwtValidator, fundController.getByUser);
+router.get('/my', jwtValidator, fundController.myFunds);
 router.get('/my/:uid', jwtValidator, fundController.myFund);
 router.get('/top_rated', fundController.topRated);
 router.get('/search', fundController.search);
+router.get('/overview', fundController.overview);
+router.get('/my_overview', jwtValidator, fundController.myOverview);
 router.post('/create', jwtValidator, fundController.create);
 router.post('/upload', jwtValidator, fundController.upload);
 router.put('/:uid', jwtValidator, fundController.update);

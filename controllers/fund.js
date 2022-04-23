@@ -75,6 +75,27 @@ const topRated = (req, res) => {
     }));
 }
 
+const overview = (req, res) => {
+    Fund.count({})
+    .then(count => res.json({
+        finish: 0,
+        raised: 0,
+        funds: count,
+        goals: 0
+    }))
+    .catch(err => res.send(err.message));
+}
+
+const myOverview = (req, res) => {
+    res.json({
+        raised: 0,
+        donate: 0,
+        active: req.user.funds.length,
+        finish: 0,
+        success: 0
+    });
+}
+
 const findByUid = (req, res) => {
     Fund.findOne({ where: { uid: req.params.uid }})
     .then(fund => {
@@ -133,16 +154,8 @@ const search = (req, res) => {
     }));
 }
 
-const getByUser = (req, res) => {
-    const user = req.user;
-    User.findOne({
-        where: { id: user.id },
-        include: "funds",
-    })
-    .then(funds => res.json(funds)).catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+const myFunds = (req, res) => {
+    res.json(req.user.funds);
 }
 
 const update = async (req, res) => {
@@ -194,9 +207,11 @@ module.exports = {
     create,
     upload,
     topRated,
+    overview,
+    myOverview,
     findByUid,
     search,
-    getByUser,
+    myFunds,
     update,
     myFund,
     deleteFund
