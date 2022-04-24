@@ -1,5 +1,6 @@
 const validator = require('validator');
 const isEmpty = require('./is_empty');
+const { isValidAddress } = require('ethereumjs-util');
 
 const validateUserSignup = data => {
     let errors = {};
@@ -14,12 +15,10 @@ const validateUserSignup = data => {
 
 const validateUserSignin = data => {
     let errors = {};
-    data.email = !isEmpty(data.email) ? data.email : '';
-    data.password = !isEmpty(data.password) ? data.password : '';
 
-    if (validator.isEmpty(data.email)) errors.email = 'Email field is required';
-    if (!validator.isEmail(data.email)) errors.email = 'Email is invalid';
-    if (validator.isEmpty(data.password)) errors.password = 'Password field is required';
+    if (isEmpty(data.email)) errors.email = 'Email field is required';
+    else if (!validator.isEmail(data.email)) errors.email = 'Email is invalid';
+    if (isEmpty(data.password)) errors.password = 'Password field is required';
     return {
         errors,
         isValid: isEmpty(errors)
@@ -32,6 +31,7 @@ const validateFundCreate = data => {
     if(isEmpty(data.amount) || parseInt(data.amount) <= 0 ) errors.amount = "Amount field is incorrect.";
     if(isEmpty(data.categoryId)) errors.categoryId = "What are you fundraising for?";
     if(isEmpty(data.walletAddress)) errors.walletAddress = "Wallet address is required.";
+    else if(!isValidAddress(data.walletAddress)) errors.walletAddress = "Wallet address is invalid.";
     if(isEmpty(data.image)) errors.image = "Please upload image";
     if(isEmpty(data.headline)) errors.headline = "Headline is required";
     if(isEmpty(data.description)) errors.description = "Description is requried";
@@ -44,19 +44,20 @@ const validateFundCreate = data => {
 
 const validateKycCreate = data => {
     let errors = {};
-    if(!data.firstName?.trim()) errors.firstName = "First name is required.";
-    if(!data.lastName?.trim()) errors.lastName = "Last name is required.";
-    if(!data.country) errors.country = "Country is required.";
-    if(!data.phone?.trim()) errors.phone = "Phone number is required.";
-    if(!data.zipCode?.trim()) errors.zipCode = "Zip code is required.";
-    if(!data.city?.trim()) errors.city = "City is required.";
-    if(!data.address?.trim()) errors.address = "Address is required.";
+    if(isEmpty(data.firstName)) errors.firstName = "First name is required.";
+    if(isEmpty(data.lastName)) errors.lastName = "Last name is required.";
+    if(isEmpty(data.country)) errors.country = "Country is required.";
+    if(isEmpty(data.phone)) errors.phone = "Phone number is required.";
+    if(isEmpty(data.zipCode)) errors.zipCode = "Zip code is required.";
+    if(isEmpty(data.city)) errors.city = "City is required.";
+    if(isEmpty(data.address)) errors.address = "Address is required.";
     if(!data.identifyType || 1 > data.identifyType || data.identifyType > 3) errors.identifyType = "Select identity type.";
-    if(!data.identifyNumber?.trim()) errors.identifyNumber = "Identity number is required.";
-    if(!data.identifyExpire) errors.identifyExpire = "Expire date is required.";
-    if(!data.doc1?.trim()) errors.doc1 = "Please upload image.";
-    if(!data.doc2?.trim()) errors.doc2 = "Please upload image.";
-    if(!data.walletAddress?.trim()) errors.walletAddress = "Wallet address is required.";
+    if(isEmpty(data.identifyNumber)) errors.identifyNumber = "Identity number is required.";
+    if(isEmpty(data.identifyExpire)) errors.identifyExpire = "Expire date is required.";
+    if(isEmpty(data.doc1)) errors.doc1 = "Please upload image.";
+    if(isEmpty(data.doc2)) errors.doc2 = "Please upload image.";
+    if(isEmpty(data.walletAddress)) errors.walletAddress = "Wallet address is required.";
+    else if(!isValidAddress(data.walletAddress)) errors.walletAddress = "Wallet address is not Valid.";
 
     return {
         errors,
@@ -66,20 +67,37 @@ const validateKycCreate = data => {
 
 const validateProfile = data => {
     let errors = {};
-    if(!data.firstName?.trim()) errors.firstname = "First name is required.";
-    if(!data.lastName?.trim()) errors.lastName = "Last name is required.";
+    if(isEmpty(data.firstName)) errors.firstname = "First name is required.";
+    if(isEmpty(data.lastName)) errors.lastName = "Last name is required.";
     if(!/^\w+$/.test(data.username)) errors.username = "Must be alphanumeric.";
     if(!validator.isEmail(data.email)) errors.email = "Email is invalid.";
-    if(!data.phone?.trim()) errors.phone = "Phone number is required.";
-    if(!data.address?.trim()) errors.address = "Address is required.";
-    if(!data.country) errors.country = "Country is required."
-    if(!data.city?.trim()) errors.city = "City is required.";
-    if(!data.zipCode?.trim()) errors.zipCode = "Zip code is required.";
+    if(isEmpty(data.phone)) errors.phone = "Phone number is required.";
+    if(isEmpty(data.address)) errors.address = "Address is required.";
+    if(isEmpty(data.country)) errors.country = "Country is required.";
+    if(isEmpty(data.city)) errors.city = "City is required.";
+    if(isEmpty(data.zipCode)) errors.zipCode = "Zip code is required.";
     
     return {
         errors,
         isValid: isEmpty(errors)
-    }    
+    }
+}
+
+validateDonate = data => {
+    let errors = {};
+    if(typeof(data.fundId) !== 'number') errors.fundId = "Fund ID is invalid.";
+    if(isEmpty(data.fromAddress)) errors.fromAddress = "From Address is required.";
+    else if(!isValidAddress(data.fromAddress)) errors.fromAddress = "From Address is invalid";
+    if(isEmpty(data.toAddress)) errors.toAddress = "To Address is required.";
+    else if(!isValidAddress(data.toAddress)) errors.toAddress = "To Address is invalid";
+    if(isEmpty(data.transactionId)) errors.transactionId = "Transaction ID is required.";
+    if(typeof(data.ethAmount) !== 'number') errors.ethAmount = "ETH amount is invalid.";
+    if(typeof(data.usdAmount) !== 'number') errors.usdAmount = "USD amount is invalid.";
+
+    return {
+        errors,
+        isValid: isEmpty(errors)
+    }
 }
 
 module.exports = {
@@ -87,5 +105,6 @@ module.exports = {
     validateUserSignin,
     validateFundCreate,
     validateKycCreate,
-    validateProfile
+    validateProfile,
+    validateDonate,
 }

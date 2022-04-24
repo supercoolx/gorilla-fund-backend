@@ -15,8 +15,7 @@ const jwtStrategy = new Strategy(options, (payload, done) => {
 				{ email: payload.email || "xxx" },
 				{ walletAddress: payload.walletAddress || "xxx" }
 			]
-		},
-		include: 'funds'
+		}
 	})
 	.then(user => {
 		if(user) return done(null, user);

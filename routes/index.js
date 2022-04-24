@@ -1,17 +1,22 @@
 const router = require('express').Router();
 const authRouter = require('./auth');
-const fundRouter = require('./fund');
 const userRouter = require('./user');
+const fundRouter = require('./fund');
+const donateRouter = require('./donate');
 
 router.use('/auth', authRouter);
-router.use('/fund', fundRouter);
 router.use('/user', userRouter);
+router.use('/fund', fundRouter);
+router.use('/donate', donateRouter);
+
 router.get('/ping', (req, res) => {
     res.send('pong');
 });
+
 router.use((req, res) => {
     return res.status(404).json({
-        success: false
+        success: false,
+        message: `Cannot find api '${req.originalUrl}'`
     });
 });
 

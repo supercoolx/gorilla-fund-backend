@@ -1,6 +1,6 @@
 const path = require('path');
-const { Op } = require('sequelize');
-const { Fund, User } = require('../config/sequelize');
+const { Op, fn, col } = require('sequelize');
+const { User, Fund, Donate } = require('../config/sequelize');
 const { validateFundCreate } = require('../utils/validator');
 const { generateUid } = require('../utils/generate_random');
 
@@ -65,6 +65,7 @@ const topRated = (req, res) => {
     count = parseInt(count);
     count = count ? count : 1;
     Fund.findAll({
+        where: { allowSearch: true },
         limit: count,
         order: [["amount", "DESC"]]
     })
@@ -86,18 +87,30 @@ const overview = (req, res) => {
     .catch(err => res.send(err.message));
 }
 
-const myOverview = (req, res) => {
-    res.json({
-        raised: 0,
-        donate: 0,
-        active: req.user.funds.length,
-        finish: 0,
-        success: 0
-    });
-}
-
 const findByUid = (req, res) => {
-    Fund.findOne({ where: { uid: req.params.uid }})
+    Fund.findOne({
+        where: {
+            uid: req.params.uid,
+            allowSearch: true,
+            deleted: false
+        },
+        include: [
+            {
+                model: Donate,
+                as: "donates",
+                include: {
+                    model: User,
+                    as: 'user',
+                    attributes: ["username", "firstName", "lastName", "avatar", "walletAddress"]
+                }
+            },
+            { 
+                model: User,
+                as: 'user',
+                attributes: ["username", "firstName", "lastName", "avatar", "walletAddress"]
+            }
+        ]
+    })
     .then(fund => {
         if(fund) res.json(fund);
         else res.status(404).json({
@@ -114,10 +127,22 @@ const findByUid = (req, res) => {
 }
 
 const myFund = (req, res) => {
-    Fund.findOne({ where: {
-        uid: req.params.uid,
-        userId: req.user.id
-    }})
+    Fund.findOne({ 
+        where: {
+            uid: req.params.uid,
+            userId: req.user.id,
+            deleted: false
+        },
+        include: [{
+            model: Donate,
+            as: "donates",
+            include: [{
+                model: User,
+                as: "user",
+                attributes: ["username", "firstName", "lastName", "avatar", "walletAddress"]
+            }]
+        }]
+    })
     .then(fund => {
         if(fund) res.json(fund);
         else res.status(404).json({
@@ -148,6 +173,7 @@ const search = (req, res) => {
         if(query.sort === "1") condition.order = [["createdAt", "DESC"]];
         if(query.sort === "2") condition.order = [["amount", "DESC"]];
     }
+    condition.where.allowSearch = true;
     Fund.findAll(condition).then(funds => res.json(funds)).catch(err => res.status(500).json({
         success: false,
         message: err.message
@@ -155,7 +181,18 @@ const search = (req, res) => {
 }
 
 const myFunds = (req, res) => {
-    res.json(req.user.funds);
+    Fund.findAll({
+        where: {
+            userId: req.user.id,
+            deleted: false
+        },
+        include: "donates"
+    })
+    .then(funds => res.json(funds))
+    .catch(err => res.status(500).json({
+        success: false,
+        message: err.message
+    }));
 }
 
 const update = async (req, res) => {
@@ -208,7 +245,6 @@ module.exports = {
     upload,
     topRated,
     overview,
-    myOverview,
     findByUid,
     search,
     myFunds,
