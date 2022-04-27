@@ -68,7 +68,7 @@ const topRated = (req, res) => {
         where: { allowSearch: true },
         attributes: {
             include: [
-                [literal("(SELECT ROUND(SUM(donates.ethAmount), 2) FROM donates WHERE donates.fundId=Fund.id)"), 'raised']
+                [literal("(SELECT ROUND(SUM(Donates.ethAmount), 2) FROM Donates WHERE Donates.fundId=Fund.id)"), 'raised']
             ]
         },
         order: [[literal('raised'), "DESC"]],
@@ -176,7 +176,7 @@ const search = (req, res) => {
         where: {},
         attributes: {
             include: [
-                [literal("(SELECT ROUND(SUM(donates.ethAmount), 2) FROM donates WHERE donates.fundId=Fund.id)"), 'raised']
+                [literal("(SELECT ROUND(SUM(Donates.ethAmount), 2) FROM Donates WHERE Donates.fundId=Fund.id)"), 'raised']
             ]
         },
     };
