@@ -1,5 +1,5 @@
 const path = require('path');
-const { Op, fn, col } = require('sequelize');
+const { Op, fn, col, literal } = require('sequelize');
 const { User, Fund, Donate } = require('../config/sequelize');
 const { validateFundCreate } = require('../utils/validator');
 const { generateUid } = require('../utils/generate_random');
@@ -66,8 +66,13 @@ const topRated = (req, res) => {
     count = count ? count : 1;
     Fund.findAll({
         where: { allowSearch: true },
+        attributes: {
+            include: [
+                [literal("(SELECT ROUND(SUM(donates.ethAmount), 2) FROM donates WHERE donates.fundId=Fund.id)"), 'raised']
+            ]
+        },
+        order: [[literal('raised'), "DESC"]],
         limit: count,
-        order: [["amount", "DESC"]]
     })
     .then(funds => res.json(funds))
     .catch(err => res.status(500).json({
@@ -88,11 +93,18 @@ const overview = (req, res) => {
 }
 
 const findByUid = (req, res) => {
-    Fund.findOne({
+    Fund.findAll({
         where: {
             uid: req.params.uid,
             allowSearch: true,
             deleted: false
+        },
+        attributes: {
+            include: [
+                [literal('COUNT(donates.id) OVER()'), "cntDonate"],
+                [literal('ROUND(SUM(donates.ethAmount) OVER (), 2)'), "sumDonateETH"],
+                [literal('ROUND(SUM(donates.usdAmount) OVER (), 2)'), "sumDonateUSD"]
+            ]
         },
         include: [
             {
@@ -102,7 +114,7 @@ const findByUid = (req, res) => {
                     model: User,
                     as: 'user',
                     attributes: ["username", "firstName", "lastName", "avatar", "walletAddress"]
-                }
+                },
             },
             { 
                 model: User,
@@ -112,7 +124,7 @@ const findByUid = (req, res) => {
         ]
     })
     .then(fund => {
-        if(fund) res.json(fund);
+        if(fund) res.json(fund[0]);
         else res.status(404).json({
             success: false,
             message: "Cannot find this fund."
@@ -160,7 +172,14 @@ const myFund = (req, res) => {
 
 const search = (req, res) => {
     const query = req.query;
-    const condition = { where: {} };
+    const condition = {
+        where: {},
+        attributes: {
+            include: [
+                [literal("(SELECT ROUND(SUM(donates.ethAmount), 2) FROM donates WHERE donates.fundId=Fund.id)"), 'raised']
+            ]
+        },
+    };
     if(query.s) condition.where = {
         [Op.or]: [
             { name: { [Op.like]: `%${query.s}%` } },
