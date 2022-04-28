@@ -1,6 +1,44 @@
-const onError = require('../utils/error');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { literal } = require('sequelize');
-const { Fund, Donate, User } = require('../config/sequelize');
+const onError = require('../utils/error');
+const { Admin, Fund, Donate, User } = require('../config/sequelize');
+
+const login = (req, res) => {
+    const { email, password } = req.body;
+    if(!email.trim() || !password.trim()) return res.status(422).json({
+        success: false,
+        message: "Invalid inputs"
+    });
+
+    Admin.findOne({ where: { email } })
+    .then(admin => [bcrypt.compare(password, admin?.password || ""), admin])
+    .then(([isMatch, admin]) => {
+        if(isMatch) {
+            jwt.sign( 
+                { email: admin.email },
+                process.env.JWT_SECRET,
+                { expiresIn: process.env.JWT_EXPIRATION },
+                (err, token) => {
+                    if(err) onError(err, res);
+                    else res.json({
+                        success: true,
+                        token: 'Bearer ' + token
+                    });
+                }
+            );
+        }
+        else res.status(403).json({
+            success: false,
+            message: "Email or password is incorrect."
+        });
+    })
+    .catch(err => onError(err, res));
+}
+
+const check = (req, res) => {
+    res.json(req.user);
+}
 
 const funds = (req, res) => {
     Fund.findAll({
@@ -58,8 +96,32 @@ const approve = (req, res) => {
     .catch(err => onError(err, res));
 }
 
+const users = (req, res) => {
+    User.findAll({ include: ['funds', 'donates'] })
+    .then(users => res.json(users))
+    .catch(err => onError(err, res));
+}
+
+const deleteUser = (req, res) => {
+    User.findByPk(req.params.id)
+    .then(user => user.update({ deleted: !user.deleted }))
+    .then(user => res.json({ success: true, deleted: user.deleted }))
+    .catch(err => onError(err, res));
+}
+
+const donates = (req, res) => {
+    Donate.findAll({ include: ['user', 'fund'] })
+    .then(donates => res.json(donates))
+    .catch(err => onError(err, res));
+}
+
 module.exports = {
+    login,
+    check,
     funds,
     fund,
     approve,
+    users,
+    deleteUser,
+    donates
 }

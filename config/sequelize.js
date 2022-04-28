@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
+const AdminModel = require('../db/models/admin');
 const UserModel = require('../db/models/user');
 const FundModel = require('../db/models/fund');
 const DonateModel = require('../db/models/donate');
@@ -13,6 +14,7 @@ const sequelize = new Sequelize(
     }
 );
 
+const Admin = AdminModel(sequelize, DataTypes);
 const User = UserModel(sequelize, DataTypes);
 const Fund = FundModel(sequelize, DataTypes);
 const Donate = DonateModel(sequelize, DataTypes);
@@ -25,6 +27,7 @@ Fund.hasMany(Donate, { as: "donates", foreignKey: "fundId" });
 Donate.belongsTo(Fund, { as: "fund", foreignKey: "fundId" });
 
 module.exports = {
+    Admin,
     User,
     Fund,
     Donate,
