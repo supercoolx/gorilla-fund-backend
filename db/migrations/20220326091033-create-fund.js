@@ -58,6 +58,10 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: 1
       },
+      approved: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: 0
+      },
       deleted: {
         type: Sequelize.BOOLEAN,
         defaultValue: 0

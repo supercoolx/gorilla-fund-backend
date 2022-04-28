@@ -1,6 +1,7 @@
 const md5 = require('md5');
 const path = require("path");
 const moment = require("moment");
+const onError = require('../utils/error');
 const { User } = require("../config/sequelize");
 const { generateRandomNumber } = require("../utils/generate_random");
 const { validateKycCreate, validateProfile } = require("../utils/validator");
@@ -29,10 +30,7 @@ const docUpload = (req, res) => {
         path1: filePath1,
         path2: filePath2
     }))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const avatarUpload = (req, res) => {
@@ -44,10 +42,7 @@ const avatarUpload = (req, res) => {
             success: true,
             path: avatar
         }))
-        .catch(err => res.status(500).json({
-            success: false,
-            message: err.message
-        }));
+        .catch(err => onError(err, res));
     }
     else {
         const file = req.files.avatar;
@@ -60,10 +55,7 @@ const avatarUpload = (req, res) => {
             success: true,
             path: filePath
         }))
-        .catch(err => res.status(500).json({
-            success: false,
-            message: err.message
-        }));
+        .catch(err => onError(err, res));
     }
 }
 
@@ -92,10 +84,7 @@ const updateProfile = (req, res) => {
         updateData.emailVerifiedAt = null;
     }
     req.user.update(updateData).then(user => res.json({ success: true }))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const kyc = async (req, res) => {
@@ -129,19 +118,13 @@ const kyc = async (req, res) => {
         walletAddress: req.body.walletAddress,
     })
     .then(user => res.json({ success: true }) )
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const emailSetting = (req, res) => {
     req.user.update({ emailSetting: req.body.val })
     .then(r => res.json({ success: true }))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const confirmWallet = (req, res) => {
@@ -151,10 +134,7 @@ const confirmWallet = (req, res) => {
         if(user) res.json({ success: false });
         else res.json({ success: true });
     })
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const updateWallet = async (req, res) => {
@@ -170,10 +150,7 @@ const updateWallet = async (req, res) => {
 
     req.user.update({ walletAddress })
     .then(() => res.json({ success: true }))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const confirmEmail = (req, res) => {
@@ -183,10 +160,7 @@ const confirmEmail = (req, res) => {
         if(user) res.json({ success: false });
         else res.json({ success: true });
     })
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 module.exports = {

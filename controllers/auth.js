@@ -10,6 +10,7 @@ const { recoverPersonalSignature } = require('eth-sig-util');
 const mail = require('../service/mail');
 const user = require('../db/models/user');
 const config = require('../config/config');
+const onError = require('../utils/error');
 const { User } = require('../config/sequelize');
 const { validateUserSignup, validateUserSignin } = require('../utils/validator');
 const { generateRandomKey, generateRandomNumber } = require('../utils/generate_random');
@@ -131,10 +132,7 @@ const forgetPassword = async (req, res) => {
             passwordTokenCreatedAt: moment().format()
         })
         .then(() => res.json({ success: true }))
-        .catch(err => res.status(500).json({
-            success: false,
-            message: err.message
-        }));
+        .catch(err => onError(err, res));
     }
     else {
         res.status(401).json({
@@ -206,10 +204,7 @@ const setVerifyEmail = (req, res) => {
         emailTokenCreateAt: moment().format()
     })
     .then(() => res.json({ success: true }))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const verifyEmail = async (req, res) => {
@@ -267,10 +262,7 @@ const getMetamaskToken = (req, res) => {
             .then(() => res.json({randomkey, walletAddress}));
         }
     })
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const signinMetamask = async (req, res) => {
@@ -325,10 +317,7 @@ const changePassword = (req, res) => {
         bcrypt.hash(newPass, 10)
         .then(hashed => req.user.update({ password: hashed }))
         .then(r => res.json({ success: true }))
-        .catch(err => res.status(500).json({
-            success: false,
-            message: err.message
-        }));
+        .catch(err => onError(err, res));
     }
     else {
         bcrypt.compare(current, req.user.password || "")
@@ -340,20 +329,14 @@ const changePassword = (req, res) => {
         })
         .then(hashed => req.user.update({ password: hashed }))
         .then(r => res.json({ success: true }))
-        .catch(err => res.status(500).json({
-            success: false,
-            message: err.message
-        }));
+        .catch(err => onError(err, res));
     }
 }
 
 const deleteAccount = (req, res) => {
     req.user.update({ deleted: true })
     .then(() => res.json({ success: true }))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const me = (req, res) => {

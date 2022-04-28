@@ -1,3 +1,4 @@
+const onError = require('../utils/error');
 const { Donate } = require('../config/sequelize');
 const { validateDonate } = require('../utils/validator');
 
@@ -22,10 +23,7 @@ const create = (req, res) => {
     
     Donate.create(donateData)
     .then(donate => res.json(donate))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 module.exports = {

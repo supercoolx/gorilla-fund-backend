@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     allowVisitorComment: DataTypes.BOOLEAN,
     allowDonation: DataTypes.BOOLEAN,
     allowSearch: DataTypes.BOOLEAN,
+    approved: DataTypes.BOOLEAN,
     deleted: DataTypes.BOOLEAN
   }, {
     sequelize,

@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.fd6fa26a.css",
-    "main.js": "/static/js/main.f3f2f2b2.js",
+    "main.css": "/static/css/main.4f6e6068.css",
+    "main.js": "/static/js/main.464532ce.js",
     "static/js/787.21c54aa5.chunk.js": "/static/js/787.21c54aa5.chunk.js",
     "static/media/gorilla_suit.png": "/static/media/gorilla_suit.0bcbecced5ae5a87ff2c.png",
     "static/media/e-sport.png": "/static/media/e-sport.57c52a4d0e88d8148998.png",
@@ -26,12 +26,12 @@
     "static/media/pencil.svg": "/static/media/pencil.b03f3a903ac3c215456d089352ac5d8e.svg",
     "static/media/security.svg": "/static/media/security.192a53845e1104ef0a1586c1276e66dd.svg",
     "static/media/flash.svg": "/static/media/flash.0c427351f2a430f78d196ee674ea3f52.svg",
-    "main.fd6fa26a.css.map": "/static/css/main.fd6fa26a.css.map",
-    "main.f3f2f2b2.js.map": "/static/js/main.f3f2f2b2.js.map",
+    "main.4f6e6068.css.map": "/static/css/main.4f6e6068.css.map",
+    "main.464532ce.js.map": "/static/js/main.464532ce.js.map",
     "787.21c54aa5.chunk.js.map": "/static/js/787.21c54aa5.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.fd6fa26a.css",
-    "static/js/main.f3f2f2b2.js"
+    "static/css/main.4f6e6068.css",
+    "static/js/main.464532ce.js"
   ]
 }

@@ -22,6 +22,7 @@ Fund.belongsTo(User, { as: "user", foreignKey: "userId" });
 User.hasMany(Donate, { as: "donates", foreignKey: "userId" });
 Donate.belongsTo(User, { as: "user", foreignKey: "userId" });
 Fund.hasMany(Donate, { as: "donates", foreignKey: "fundId" });
+Donate.belongsTo(Fund, { as: "fund", foreignKey: "fundId" });
 
 module.exports = {
     User,

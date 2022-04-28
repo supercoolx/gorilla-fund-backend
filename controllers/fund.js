@@ -1,5 +1,6 @@
 const path = require('path');
 const { Op, fn, col, literal } = require('sequelize');
+const onError = require('../utils/error');
 const { User, Fund, Donate } = require('../config/sequelize');
 const { validateFundCreate } = require('../utils/validator');
 const { generateUid } = require('../utils/generate_random');
@@ -21,14 +22,8 @@ const create = (req, res) => {
         headline: data.headline,
         description: data.description
     })
-    .then(fund => {
-        res.json(fund);
-    })
-    .catch(err => 
-        res.status(500).json({
-            success: false,
-            message: err.message
-        })
+    .then(fund => res.json(fund))
+    .catch(err => onError(err, res)
     );
 }
 
@@ -52,12 +47,7 @@ const upload = (req, res) => {
             filePath: filePath
         });
     })
-    .catch(err => {
-        res.status(500).json({
-            success: false,
-            message: err.message
-        });
-    });
+    .catch(err => onError(err, res));
 }
 
 const topRated = (req, res) => {
@@ -65,7 +55,11 @@ const topRated = (req, res) => {
     count = parseInt(count);
     count = count ? count : 1;
     Fund.findAll({
-        where: { allowSearch: true },
+        where: {
+            allowSearch: true,
+            approved: true,
+            deleted: false
+        },
         attributes: {
             include: [
                 [literal("(SELECT ROUND(SUM(Donates.ethAmount), 2) FROM Donates WHERE Donates.fundId=Fund.id)"), 'raised']
@@ -75,21 +69,29 @@ const topRated = (req, res) => {
         limit: count,
     })
     .then(funds => res.json(funds))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
-const overview = (req, res) => {
-    Fund.count({})
-    .then(count => res.json({
-        finish: 0,
-        raised: 0,
-        funds: count,
-        goals: 0
-    }))
-    .catch(err => res.send(err.message));
+const overview = async (req, res) => {
+    try{
+        const funds = await Fund.count({
+            where: {
+                approved: true,
+                deleted: false
+            }
+        });
+        const raised = await Donate.count({});
+        const goals = await Fund.sum('amount', {
+            where: {
+                approved: true,
+                deleted: false
+            }
+        });
+        res.json({ finish: 0, raised, funds, goals });
+    }
+    catch(err) {
+        onError(err, res);
+    }
 }
 
 const findByUid = (req, res) => {
@@ -97,6 +99,7 @@ const findByUid = (req, res) => {
         where: {
             uid: req.params.uid,
             allowSearch: true,
+            approved: true,
             deleted: false
         },
         attributes: {
@@ -124,18 +127,13 @@ const findByUid = (req, res) => {
         ]
     })
     .then(fund => {
-        if(fund) res.json(fund[0]);
+        if(fund.length) res.json(fund[0]);
         else res.status(404).json({
             success: false,
             message: "Cannot find this fund."
         });
     })
-    .catch(err =>
-        res.status(500).json({
-            success: false,
-            message: err.message
-        })
-    );
+    .catch(err => onError(err, res));
 }
 
 const myFund = (req, res) => {
@@ -162,18 +160,17 @@ const myFund = (req, res) => {
             message: "Cannot find this fund."
         });
     })
-    .catch(err =>
-        res.status(500).json({
-            success: false,
-            message: err.message
-        })
-    );
+    .catch(err => onError(err, res));
 }
 
 const search = (req, res) => {
     const query = req.query;
     const condition = {
-        where: {},
+        where: {
+            allowSearch: true,
+            approved: true,
+            deleted: false
+        },
         attributes: {
             include: [
                 [literal("(SELECT ROUND(SUM(Donates.ethAmount), 2) FROM Donates WHERE Donates.fundId=Fund.id)"), 'raised']
@@ -190,13 +187,9 @@ const search = (req, res) => {
     if(query.category) condition.where.categoryId = query.category;
     if(query.sort) {
         if(query.sort === "1") condition.order = [["createdAt", "DESC"]];
-        if(query.sort === "2") condition.order = [["amount", "DESC"]];
+        if(query.sort === "2") condition.order = [[literal('raised'), "DESC"]];
     }
-    condition.where.allowSearch = true;
-    Fund.findAll(condition).then(funds => res.json(funds)).catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    Fund.findAll(condition).then(funds => res.json(funds)).catch(err => onError(err, res));
 }
 
 const myFunds = (req, res) => {
@@ -208,10 +201,7 @@ const myFunds = (req, res) => {
         include: "donates"
     })
     .then(funds => res.json(funds))
-    .catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    .catch(err => onError(err, res));
 }
 
 const update = async (req, res) => {
@@ -225,17 +215,15 @@ const update = async (req, res) => {
     const fund = await Fund.findOne({
         where: {
             uid: uid,
-            userId: req.user.id
+            userId: req.user.id,
+            deleted: false
         }
     });
     if(!fund) return res.status(404).json({
         success: false,
         message: "Cannot find this fund."
     });
-    fund.update(updates).then(fund => res.json(fund)).catch(err => res.status(500).json({
-        success: false,
-        message: err.message
-    }));
+    fund.update(updates).then(fund => res.json(fund)).catch(err => onError(err, res));
 }
 
 const deleteFund = (req, res) => {
@@ -243,7 +231,8 @@ const deleteFund = (req, res) => {
     Fund.destroy({
         where: {
             uid: uid,
-            userId: req.user.id
+            userId: req.user.id,
+            deleted: false
         }
     })
     .then(result => {
